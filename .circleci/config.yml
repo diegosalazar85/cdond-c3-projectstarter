@@ -23,7 +23,7 @@ jobs:
       - image: circleci/node:13.14.0
     steps:
       - install-dependencies:
-          parameters: frontend
+          project-name: frontend
       - run:
           name: Build front-end
           command: |
@@ -38,7 +38,7 @@ jobs:
       - image: circleci/node:13.14.0
     steps:
       - install-dependencies:
-          parameters: backend
+          project-name: backend
       - run:
           name: Build back-end
           command: |
