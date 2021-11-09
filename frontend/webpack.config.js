@@ -12,18 +12,19 @@ var outPath = path.join(__dirname, './dist');
 // plugins
 var HtmlWebpackPlugin = require('html-webpack-plugin');
 var MiniCssExtractPlugin = require('mini-css-extract-plugin');
-var WebpackCleanupPlugin = require('webpack-cleanup-plugin');
 
 module.exports = {
+  mode: 'production',
   context: sourcePath,
   entry: {
     app: './main.tsx',
   },
   output: {
     path: outPath,
-    filename: 'bundle.js',
+    filename: '[name].js',
     chunkFilename: '[chunkhash].js',
     publicPath: process.env.FRONTEND_URL || '/',
+    clean: true
   },
   target: 'web',
   resolve: {
@@ -74,21 +75,22 @@ module.exports = {
           {
             loader: 'postcss-loader',
             options: {
-              ident: 'postcss',
-              plugins: [
-                require('postcss-import')({
-                  addDependencyTo: webpack,
-                }),
-                require('postcss-url')(),
-                require('postcss-preset-env')({
-                  /* use stage 2 features (defaults) */
-                  stage: 2,
-                }),
-                require('postcss-reporter')(),
-                require('postcss-browser-reporter')({
-                  disabled: isProduction,
-                }),
-              ],
+              postcssOptions: {
+                plugins: [
+                  require('postcss-import')({
+                    addDependencyTo: webpack,
+                  }),
+                  require('postcss-url')(),
+                  require('postcss-preset-env')({
+                    /* use stage 2 features (defaults) */
+                    stage: 2,
+                  }),
+                  require('postcss-reporter')(),
+                  require('postcss-browser-reporter')({
+                    disabled: isProduction,
+                  }),
+                ],
+              }
             },
           },
         ],
@@ -100,7 +102,7 @@ module.exports = {
           isProduction ? MiniCssExtractPlugin.loader : 'style-loader',
           {
             loader: 'css-loader',
-            query: {
+            options: {
               modules: false,
               sourceMap: !isProduction,
               importLoaders: 1,
@@ -134,13 +136,13 @@ module.exports = {
   },
   optimization: {
     splitChunks: {
-      name: true,
+      name: false,
       cacheGroups: {
         commons: {
           chunks: 'initial',
           minChunks: 2,
         },
-        vendors: {
+        defaultVendors: {
           test: /[\\/]node_modules[\\/]/,
           chunks: 'all',
           priority: -10,
@@ -157,10 +159,8 @@ module.exports = {
       API_URL: process.env.API_URL,
       WP_HELP_EMAIL: 'info@acklenavenue.com',
     }),
-    new WebpackCleanupPlugin(),
     new MiniCssExtractPlugin({
       filename: '[contenthash].css',
-      disable: !isProduction,
     }),
     new HtmlWebpackPlugin({
       inject: true,
@@ -184,10 +184,4 @@ module.exports = {
   },
   // https://webpack.js.org/configuration/devtool/
   devtool: isProduction ? 'hidden-source-map' : 'inline-source-map',
-  node: {
-    // workaround for webpack-dev-server issue
-    // https://github.com/webpack/webpack-dev-server/issues/60#issuecomment-103411179
-    fs: 'empty',
-    net: 'empty',
-  },
 };
