@@ -54,6 +54,7 @@ jobs:
           name: Build front-end
           command: |
             cd frontend
+            export API_URL="http://localhost:3030"
             npm run build:prod
       - save_cache:
           paths: [frontend/node_modules]
