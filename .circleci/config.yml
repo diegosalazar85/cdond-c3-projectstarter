@@ -16,7 +16,6 @@ commands:
           command: |
             cd << parameters.project-name >>
             npm ci
-  
   test-project:
     description: Run project unit tests
     parameters:
@@ -28,8 +27,7 @@ commands:
           name: Test project
           command: |
             cd << parameters.project-name >>
-            npm run test
-  
+            npm run test 
   scan-project:
     description: Scan project dependencies for vulnerabilities
     parameters:
@@ -42,6 +40,22 @@ commands:
           command: |
             cd << parameters.project-name >>
             npm audit --audit-level=critical
+  destroy-environment:
+    description: Destroy back-end and front-end cloudformation stacks given a workflow ID.
+    parameters:
+      backend-stack-name:
+        description: Name of the backend CloudFormation stack
+        type: string 
+      frontend-stack-name:
+        description: Name of the frontend CloudFormation stack
+        type: string 
+    steps:
+      - run: 
+          name: Destroy environment
+          command: | 
+            aws cloudformation delete-stack --stack-name << parameters.backend-stack-name >>
+            aws cloudformation delete-stack --stack-name << parameters.frontend-stack-name >>
+          when: on_fail
 
 jobs:
   build-frontend:
@@ -88,8 +102,7 @@ jobs:
       - install-dependencies:
           project-name: backend
       - test-project:
-          project-name: backend
-            
+          project-name: backend          
   scan-frontend:
     docker:
       - image: circleci/node:13.14.0
@@ -98,7 +111,6 @@ jobs:
           project-name: frontend
       - scan-project:
           project-name: frontend
-
   scan-backend:
     docker:
       - image: circleci/node:13.14.0
@@ -107,6 +119,43 @@ jobs:
           project-name: backend
       - scan-project:
           project-name: backend
+  deploy-infrastructure:
+    docker:
+      - image: amazon/aws-cli
+    steps:
+      - checkout
+      - run: yum install -y tar gzip
+      - run:
+          name: Ensure back-end infrastructure exists
+          command: |
+            aws cloudformation deploy \
+              --template-file .circleci/files/backend.yml \
+              --stack-name "udapeople-backend-${CIRCLE_WORKFLOW_ID:0:7}" \
+              --parameter-overrides ID="${CIRCLE_WORKFLOW_ID:0:7}"  
+              --tags project=udapeople \
+      - run:
+          name: Ensure front-end infrastructure exist
+          command: |
+            aws cloudformation deploy \
+              --template-file .circleci/files/frontend.yml \
+              --stack-name "udapeople-frontend-${CIRCLE_WORKFLOW_ID:0:7}" \
+              --parameter-overrides ID="${CIRCLE_WORKFLOW_ID:0:7}" \
+              --tags project=udapeople
+      - run:
+          name: Add back-end ip to ansible inventory
+          command: |
+            aws ec2 describe-instances \
+              --query 'Reservations[*].Instances[*].PublicIpAddress' \
+              --filters "Name=tag:Project,Values=udapeople" \
+              --output text \
+              >> .circleci/ansible/inventory.txt
+      - persist_to_workspace:
+          root: ~/
+          paths:
+            - project/.circleci/ansible/inventory.txt
+      - destroy-environment:
+          backend-stack-name: udapeople-backend-${CIRCLE_WORKFLOW_ID:0:7}
+          frontend-stack-name: udapeople-frontend-${CIRCLE_WORKFLOW_ID:0:7}
 
 workflows:
   default:
@@ -121,3 +170,5 @@ workflows:
           requires: [build-frontend]
       - scan-backend:
           requires: [build-backend]
+      - deploy-infrastructure:
+          requires: [test-frontend, test-backend, scan-frontend, scan-backend]
