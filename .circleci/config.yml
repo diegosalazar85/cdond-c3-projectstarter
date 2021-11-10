@@ -28,8 +28,6 @@ commands:
           command: |
             cd << parameters.project-name >>
             npm run test 
-          environment:
-            NODE_OPTIONS: --max_old_space_size=8192
   scan-project:
     description: Scan project dependencies for vulnerabilities
     parameters:
@@ -63,6 +61,8 @@ jobs:
   build-frontend:
     docker:
       - image: circleci/node:13.14.0
+    environment:
+      NODE_OPTIONS: --max_old_space_size=8192
     steps:
       - install-dependencies:
           project-name: frontend
