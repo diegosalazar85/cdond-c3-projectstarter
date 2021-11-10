@@ -15,7 +15,7 @@ commands:
           name: Install Dependencies
           command: |
             cd << parameters.project-name >>
-            npm ci
+            npm install
   test-project:
     description: Run project unit tests
     parameters:
@@ -90,6 +90,7 @@ jobs:
   test-frontend:
     docker:
       - image: circleci/node:13.14.0
+    resource_class: medium
     steps:
       - install-dependencies:
           project-name: frontend
