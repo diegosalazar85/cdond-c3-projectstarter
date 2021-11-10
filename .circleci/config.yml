@@ -16,6 +16,7 @@ commands:
           command: |
             cd << parameters.project-name >>
             npm install
+  
   test-project:
     description: Run project unit tests
     parameters:
@@ -28,6 +29,7 @@ commands:
           command: |
             cd << parameters.project-name >>
             npm run test 
+  
   scan-project:
     description: Scan project dependencies for vulnerabilities
     parameters:
@@ -40,6 +42,7 @@ commands:
           command: |
             cd << parameters.project-name >>
             npm audit --audit-level=critical
+  
   destroy-environment:
     description: Destroy back-end and front-end cloudformation stacks given a workflow ID.
     parameters:
@@ -73,6 +76,7 @@ jobs:
       - save_cache:
           paths: [frontend/node_modules]
           key: frontend-build
+  
   build-backend:
     docker:
       - image: circleci/node:13.14.0
@@ -87,6 +91,7 @@ jobs:
       - save_cache:
           paths: [backend/node_modules]
           key: backend-build
+  
   test-frontend:
     docker:
       - image: circleci/node:13.14.0
@@ -95,6 +100,7 @@ jobs:
           project-name: frontend
       - test-project:
           project-name: frontend
+  
   test-backend:
     docker:
       - image: circleci/node:13.14.0
@@ -102,7 +108,8 @@ jobs:
       - install-dependencies:
           project-name: backend
       - test-project:
-          project-name: backend          
+          project-name: backend 
+           
   scan-frontend:
     docker:
       - image: circleci/node:13.14.0
@@ -111,6 +118,7 @@ jobs:
           project-name: frontend
       - scan-project:
           project-name: frontend
+  
   scan-backend:
     docker:
       - image: circleci/node:13.14.0
@@ -119,6 +127,7 @@ jobs:
           project-name: backend
       - scan-project:
           project-name: backend
+  
   deploy-infrastructure:
     docker:
       - image: amazon/aws-cli
@@ -156,6 +165,29 @@ jobs:
       - destroy-environment:
           backend-stack-name: udapeople-backend-${CIRCLE_WORKFLOW_ID:0:7}
           frontend-stack-name: udapeople-frontend-${CIRCLE_WORKFLOW_ID:0:7}
+  
+  configure-infrastructure:
+    docker:
+      - image: python:3.7.6-alpine3.11
+    steps:
+      - checkout
+      - add_ssh_keys:
+          fingerprints: 
+            - "13:ce:77:72:1e:ed:1b:a5:cd:11:a0:a0:3b:94:b6:b1"
+      - attach_workspace:
+          at: ~/
+      - run:
+          name: Install dependencies
+          command: |
+            apk add --update ansible
+      - run:
+          name: Configure server
+          command: |
+            cd .circleci/ansible
+            ansible-playbook -i inventory.txt configure-server.yml
+      - destroy-environment:
+          backend-stack-name: udapeople-backend-${CIRCLE_WORKFLOW_ID:0:7}
+          frontend-stack-name: udapeople-frontend-${CIRCLE_WORKFLOW_ID:0:7}
 
 workflows:
   default:
@@ -172,3 +204,5 @@ workflows:
           requires: [build-backend]
       - deploy-infrastructure:
           requires: [test-frontend, test-backend, scan-frontend, scan-backend]
+      - configure-infrastructure:
+          requires: [deploy-infrastructure]
