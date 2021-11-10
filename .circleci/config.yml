@@ -185,11 +185,6 @@ jobs:
           command: |
             cd .circleci/ansible
             ansible-playbook -i inventory.txt configure-server.yml
-
-  rollbak-on-failure:
-    docker:
-      - image: amazon/aws-cli
-    steps:
       - destroy-environment:
           backend-stack-name: udapeople-backend-${CIRCLE_WORKFLOW_ID:0:7}
           frontend-stack-name: udapeople-frontend-${CIRCLE_WORKFLOW_ID:0:7}
@@ -211,4 +206,3 @@ workflows:
           requires: [test-frontend, test-backend, scan-frontend, scan-backend]
       - configure-infrastructure:
           requires: [deploy-infrastructure]
-      - rollbak-on-failure
