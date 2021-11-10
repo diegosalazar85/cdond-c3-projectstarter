@@ -90,8 +90,6 @@ jobs:
   test-frontend:
     docker:
       - image: circleci/node:13.14.0
-    environment:
-      NODE_OPTIONS: --max_old_space_size=8192
     steps:
       - install-dependencies:
           project-name: frontend
