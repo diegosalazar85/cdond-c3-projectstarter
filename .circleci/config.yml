@@ -182,11 +182,10 @@ jobs:
           command: |
             yum update -y
             yum install -y python3
-            yum install -y python3-pip
       - run:
           name: Install Ansible
           command: |
-            apk add --update ansible
+            yum install -y ansible
       - run:
           name: Configure server
           command: |
