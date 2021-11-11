@@ -1,5 +1,8 @@
 version: 2.1
 
+orbs:
+  aws-cli: circleci/aws-cli@2.0.3
+
 commands:
   install-dependencies:
     description: Install project dependencies
@@ -168,9 +171,10 @@ jobs:
   
   configure-infrastructure:
     docker:
-      - image: amazon/aws-cli
+      - image: python:3.7.6-alpine3.11
     steps:
       - checkout
+      - aws-cli/setup
       - add_ssh_keys:
           fingerprints: 
             - "13:ce:77:72:1e:ed:1b:a5:cd:11:a0:a0:3b:94:b6:b1"
@@ -178,14 +182,9 @@ jobs:
       - attach_workspace:
           at: ~/
       - run:
-          name: Install Python
-          command: |
-            yum update -y
-            yum install -y python3
-      - run:
           name: Install Ansible
           command: |
-            pip3 install ansible
+            apk add --update ansible
       - run:
           name: Configure server
           command: |
@@ -201,6 +200,7 @@ jobs:
     steps:
       - install-dependencies:
           project-name: backend
+      - aws-cli/setup
       - run:
           name: Run migrations
           command: |
