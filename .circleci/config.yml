@@ -269,5 +269,7 @@ workflows:
           requires: [configure-infrastructure]
       - deploy-frontend:
           requires: [run-migrations]
-      - rollback:
-          when: on_fail
+  rollback:
+    when: on_fail
+    jobs:
+      - rollback
