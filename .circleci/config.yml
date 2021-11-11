@@ -170,10 +170,7 @@ jobs:
           frontend-stack-name: udapeople-frontend-${CIRCLE_WORKFLOW_ID:0:7}
   
   configure-infrastructure:
-    executor: 
-      - aws-cli/default
-    docker:
-      - image: python:3.7.6-alpine3.11
+    executor: aws-cli/default
     steps:
       - checkout
       - aws-cli/setup
