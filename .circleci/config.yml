@@ -195,7 +195,6 @@ jobs:
     steps:
       - install-dependencies:
           project-name: backend
-      - aws-cli/setup
       - run:
           name: Run migrations
           command: |
@@ -239,6 +238,15 @@ jobs:
       - destroy-environment:
           backend-stack-name: udapeople-backend-${CIRCLE_WORKFLOW_ID:0:7}
           frontend-stack-name: udapeople-frontend-${CIRCLE_WORKFLOW_ID:0:7} 
+  
+  rollback:
+    docker:
+      - image: amazon/aws-cli
+    steps:
+      - destroy-environment:
+          backend-stack-name: udapeople-backend-${CIRCLE_WORKFLOW_ID:0:7}
+          frontend-stack-name: udapeople-frontend-${CIRCLE_WORKFLOW_ID:0:7} 
+  
 
 workflows:
   default:
@@ -259,3 +267,7 @@ workflows:
           requires: [deploy-infrastructure]
       - run-migrations:
           requires: [configure-infrastructure]
+      - deploy-frontend:
+          requires: [run-migrations]
+      - rollback:
+          when: on_fail
