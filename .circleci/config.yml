@@ -162,17 +162,13 @@ jobs:
           root: ~/
           paths:
             - project/.circleci/ansible/inventory.txt
-      - run:
-          name: Rollback test
-          command: |
-            exit 1
       - destroy-environment:
           backend-stack-name: udapeople-backend-${CIRCLE_WORKFLOW_ID:0:7}
           frontend-stack-name: udapeople-frontend-${CIRCLE_WORKFLOW_ID:0:7}
   
   configure-infrastructure:
     docker:
-      - image: python:3.7.6-alpine3.11
+      - image: amazon/aws-cli
     steps:
       - checkout
       - add_ssh_keys:
@@ -181,7 +177,11 @@ jobs:
       - attach_workspace:
           at: ~/
       - run:
-          name: Install dependencies
+          name: Install Python
+          command: |
+            apk add --update python3 py3-pip
+      - run:
+          name: Install Ansible
           command: |
             apk add --update ansible
       - run:
