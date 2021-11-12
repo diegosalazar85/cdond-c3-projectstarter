@@ -20,6 +20,15 @@ commands:
             cd << parameters.project-name >>
             npm install
   
+  build-frontend:
+    description: Build Frontend
+    steps:
+      - run:
+          name: Build front-end
+          command: |
+            cd frontend
+            npm run build:prod
+  
   test-project:
     description: Run project unit tests
     parameters:
@@ -71,11 +80,13 @@ jobs:
       - install-dependencies:
           project-name: frontend
       - run:
-          name: Build front-end
+          name: Get backend url
           command: |
-            cd frontend
             export API_URL="http://localhost:3030"
-            npm run build:prod
+            echo "API_URL = ${API_URL}"
+            echo API_URL="http://${localhost}:3030" >> frontend/.env
+            cat frontend/.env
+      - build-frontend
       - save_cache:
           paths: [frontend/node_modules]
           key: frontend-build
@@ -234,9 +245,11 @@ jobs:
             echo "API_URL = ${API_URL}"
             echo API_URL="http://${BACKEND_IP}:3030" >> frontend/.env
             cat frontend/.env
+      - build-frontend
       - run:
           name: Deploy frontend objects
           command: |
+            cd frontend
             npm run build:prod
             tar -czvf artifact-"${CIRCLE_WORKFLOW_ID:0:7}".tar.gz dist
             aws s3 cp dist s3://udapeople-${CIRCLE_WORKFLOW_ID:0:7} --recursive
