@@ -216,6 +216,11 @@ jobs:
       - image: amazon/aws-cli
     steps:
       - run: yum install -y tar gzip
+      - run:
+          name: Install NodeJs
+          command: |
+            curl -sL https://rpm.nodesource.com/setup_13.x | sudo bash -
+            yum install nodejs
       - install-dependencies:
           project-name: frontend
       - run:
@@ -269,7 +274,3 @@ workflows:
           requires: [configure-infrastructure]
       - deploy-frontend:
           requires: [run-migrations]
-  rollback:
-    when: on_fail
-    jobs:
-      - rollback
