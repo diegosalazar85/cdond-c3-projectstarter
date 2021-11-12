@@ -224,14 +224,10 @@ jobs:
   
   deploy-frontend:
     docker:
-      - image: amazon/aws-cli
+      - image: circleci/node:13.14.0
     steps:
-      - run: yum install -y tar gzip
-      - run:
-          name: Install NodeJs
-          command: |
-            curl -sL https://rpm.nodesource.com/setup_13.x | bash -
-            yum install -y nodejs
+      - aws-cli/install
+      - aws-cli/setup
       - install-dependencies:
           project-name: frontend
       - run:
