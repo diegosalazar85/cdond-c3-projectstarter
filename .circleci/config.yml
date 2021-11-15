@@ -187,7 +187,7 @@ jobs:
   
   configure-infrastructure:   
     docker:
-      - image: python:3.7.6-alpine3.11
+      - image: cimg/python:3.7
     steps:
       - aws-cli/install
       - aws-cli/setup
@@ -267,7 +267,7 @@ jobs:
 
   deploy-backend:
     docker:
-      - image: python:3.7.6-alpine3.11
+      - image: cimg/python:3.7
     steps:
       - aws-cli/install
       - aws-cli/setup
