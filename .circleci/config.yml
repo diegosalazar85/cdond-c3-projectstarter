@@ -96,17 +96,6 @@ commands:
             sudo apt-add-repository ppa:ansible/ansible
             sudo apt update
             sudo apt install -y ansible
-  
-  export-backend-ip:
-    description: Retrive Backend URL and Export BACKEND_IP
-    steps:
-      - run:
-          name: Export backend URL
-          command: |
-            export BACKEND_IP=$(aws cloudformation list-exports \
-            --query "Exports[?Name==\`EC2InstanceDNS\`].Value" \
-            --no-paginate \
-            --output text)
 
 jobs:
   build-frontend:
@@ -263,10 +252,13 @@ jobs:
       - install-aws-cli
       - install-dependencies:
           project-name: frontend
-      - export-backend-ip
       - run:
-          name: Export API_URL
+          name: Get backend URL
           command: |
+            export BACKEND_IP=$(aws cloudformation list-exports \
+            --query "Exports[?Name==\`EC2InstanceDNS\`].Value" \
+            --no-paginate \
+            --output text)
             export API_URL="http://${BACKEND_IP}:3030"
             echo "API_URL = ${API_URL}"
             echo API_URL="http://${BACKEND_IP}:3030" >> frontend/.env
@@ -319,10 +311,13 @@ jobs:
       - image: amazon/aws-cli
     steps:
       - checkout
-      - export-backend-ip
       - run:
           name: Backend smoke test.
           command: |
+            export BACKEND_IP=$(aws cloudformation list-exports \
+            --query "Exports[?Name==\`EC2InstanceDNS\`].Value" \
+            --no-paginate \
+            --output text)
             export API_URL="http://${BACKEND_IP}:3030"
             echo "${API_URL}"
             if curl "${API_URL}/api/status" | grep "ok"
