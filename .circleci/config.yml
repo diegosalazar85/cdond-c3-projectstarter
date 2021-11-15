@@ -287,6 +287,8 @@ jobs:
       - attach_workspace:
           at: ~/
       - install-ansible
+      - install-dependencies:
+          project-name: backend
       - build-backend
       - run:
           name: Zip directory
