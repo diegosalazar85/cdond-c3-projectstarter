@@ -20,6 +20,15 @@ commands:
             cd << parameters.project-name >>
             npm install
   
+  build-backend:
+    description: Build Backend
+    steps:
+      - run:
+          name: Build back-end
+          command: |
+            cd backend
+            npm run build
+  
   build-frontend:
     description: Build Frontend
     steps:
@@ -97,11 +106,7 @@ jobs:
     steps:
       - install-dependencies:
           project-name: backend
-      - run:
-          name: Build back-end
-          command: |
-            cd backend
-            npm run build
+      - build-backend
       - save_cache:
           paths: [backend/node_modules]
           key: backend-build
@@ -184,6 +189,8 @@ jobs:
     docker:
       - image: python:3.7.6-alpine3.11
     steps:
+      - aws-cli/install
+      - aws-cli/setup
       - checkout
       - add_ssh_keys:
           fingerprints: 
@@ -199,11 +206,16 @@ jobs:
           command: |
             cd .circleci/ansible
             ansible-playbook -i inventory.txt configure-server.yml
+      - destroy-environment:
+          backend-stack-name: udapeople-backend-${CIRCLE_WORKFLOW_ID:0:7}
+          frontend-stack-name: udapeople-frontend-${CIRCLE_WORKFLOW_ID:0:7}
 
   run-migrations:
     docker:
       - image: circleci/node:13.14.0
     steps:
+      - aws-cli/install
+      - aws-cli/setup
       - install-dependencies:
           project-name: backend
       - run:
@@ -252,14 +264,39 @@ jobs:
       - destroy-environment:
           backend-stack-name: udapeople-backend-${CIRCLE_WORKFLOW_ID:0:7}
           frontend-stack-name: udapeople-frontend-${CIRCLE_WORKFLOW_ID:0:7} 
-  
-  rollback:
+
+  deploy-backend:
     docker:
-      - image: amazon/aws-cli
+      - image: python:3.7.6-alpine3.11
     steps:
+      - aws-cli/install
+      - aws-cli/setup
+      - checkout
+      - add_ssh_keys:
+          fingerprints: 
+            - "13:ce:77:72:1e:ed:1b:a5:cd:11:a0:a0:3b:94:b6:b1"
+      - attach_workspace:
+          at: ~/
+      - run:
+          name: Install Ansible
+          command: |
+            apk add --update ansible
+      - build-backend
+      - run:
+          name: Zip directory
+          command: |
+            tar -C backend -czvf artifact.tar.gz .
+            cp artifact.tar.gz .circleci/ansible/roles/deploy/files
+      - run:
+          name: Configure server
+          command: |
+            cd .circleci/ansible
+            echo "Contents  of the inventory.txt file is -------"
+            cat inventory.txt
+            ansible-playbook -i inventory.txt deploy-backend.yml
       - destroy-environment:
           backend-stack-name: udapeople-backend-${CIRCLE_WORKFLOW_ID:0:7}
-          frontend-stack-name: udapeople-frontend-${CIRCLE_WORKFLOW_ID:0:7} 
+          frontend-stack-name: udapeople-frontend-${CIRCLE_WORKFLOW_ID:0:7}
 
 workflows:
   default:
