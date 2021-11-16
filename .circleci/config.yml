@@ -221,10 +221,6 @@ jobs:
             echo "Contents  of the inventory.txt file is -------"
             cat inventory.txt
             ansible-playbook -i inventory.txt configure-server.yml
-      - persist_to_workspace:
-          root: ~/
-          paths:
-            - project/.circleci/ansible/inventory.txt
       - destroy-environment:
           backend-stack-name: udapeople-backend-${CIRCLE_WORKFLOW_ID:0:7}
           frontend-stack-name: udapeople-frontend-${CIRCLE_WORKFLOW_ID:0:7}
@@ -287,15 +283,14 @@ jobs:
       - image: cimg/python:3.7-node
     steps:
       - install-aws-cli
-      - checkout
+      - install-dependencies:
+          project-name: backend
       - add_ssh_keys:
           fingerprints: 
             - "13:ce:77:72:1e:ed:1b:a5:cd:11:a0:a0:3b:94:b6:b1"
       - attach_workspace:
           at: ~/
       - install-ansible
-      - install-dependencies:
-          project-name: backend
       - build-backend
       - run:
           name: Zip directory
