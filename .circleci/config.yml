@@ -291,6 +291,26 @@ jobs:
       - attach_workspace:
           at: ~/
       - install-ansible
+      - run:
+          name: Add .env file
+          command: |
+            cat > backend/.env <<EOL
+            NODE_ENV=production
+            VERSION=1
+            TYPEORM_CONNECTION=$TYPEORM_CONNECTION
+            TYPEORM_MIGRATIONS_DIR=$TYPEORM_MIGRATIONS_DIR
+            TYPEORM_ENTITIES=$TYPEORM_ENTITIES
+            TYPEORM_MIGRATIONS=$TYPEORM_MIGRATIONS
+
+            TYPEORM_HOST=$TYPEORM_HOST
+            TYPEORM_PORT=$TYPEORM_PORT
+            TYPEORM_USERNAME=$TYPEORM_USERNAME
+            TYPEORM_PASSWORD=$TYPEORM_PASSWORD
+            TYPEORM_DATABASE=$TYPEORM_DATABASE
+            ...
+            EOL
+
+            cat backend/.env
       - build-backend
       - run:
           name: Zip directory
