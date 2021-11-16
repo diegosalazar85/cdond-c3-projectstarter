@@ -294,7 +294,8 @@ jobs:
       - run:
           name: Add .env file
           command: |
-            cat > backend/.env <<EOL
+            cd backend
+            cat > .env <<EOL
             NODE_ENV=production
             VERSION=1
             TYPEORM_CONNECTION=$TYPEORM_CONNECTION
@@ -307,9 +308,9 @@ jobs:
             TYPEORM_USERNAME=$TYPEORM_USERNAME
             TYPEORM_PASSWORD=$TYPEORM_PASSWORD
             TYPEORM_DATABASE=$TYPEORM_DATABASE
-            ...
             EOL
 
+            cd ..
             cat backend/.env
       - build-backend
       - run:
