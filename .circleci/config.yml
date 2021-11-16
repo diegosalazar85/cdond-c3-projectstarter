@@ -330,6 +330,9 @@ jobs:
     steps:
       - checkout
       - run:
+          name: Wait for Backend API to be bootstrap
+          command: sleep 60;
+      - run:
           name: Backend smoke test.
           command: |
             export BACKEND_IP=$(aws cloudformation list-exports \
@@ -383,5 +386,5 @@ workflows:
           requires: [run-migrations]
       - deploy-backend:
           requires: [run-migrations]
-      # - smoke-test:
-      #     requires: [deploy-backend, deploy-frontend]
+      - smoke-test:
+          requires: [deploy-backend, deploy-frontend]
