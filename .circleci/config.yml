@@ -78,6 +78,7 @@ commands:
           name: Destroy environment
           command: | 
             aws cloudformation delete-stack --stack-name << parameters.backend-stack-name >>
+            aws s3 rm s3://udapeople-${CIRCLE_WORKFLOW_ID:0:7} --recursive
             aws cloudformation delete-stack --stack-name << parameters.frontend-stack-name >>
           when: on_fail
   
@@ -217,6 +218,8 @@ jobs:
           name: Configure server
           command: |
             cd .circleci/ansible
+            echo "Contents  of the inventory.txt file is -------"
+            cat inventory.txt
             ansible-playbook -i inventory.txt configure-server.yml
       - destroy-environment:
           backend-stack-name: udapeople-backend-${CIRCLE_WORKFLOW_ID:0:7}
