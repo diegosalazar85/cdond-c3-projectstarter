@@ -35,6 +35,7 @@ module.exports = {
     alias: {
       app: path.resolve(__dirname, 'src/app/'),
       assets: path.resolve(__dirname, 'src/assets/'),
+      'react-dom': '@hot-loader/react-dom',
     },
   },
   module: {
@@ -173,14 +174,13 @@ module.exports = {
     }),
   ],
   devServer: {
-    contentBase: sourcePath,
     hot: true,
-    inline: true,
     historyApiFallback: {
       disableDotRule: true,
     },
-    stats: 'minimal',
-    clientLogLevel: 'warning',
+    client: {
+      logging: 'warn',
+    }
   },
   // https://webpack.js.org/configuration/devtool/
   devtool: isProduction ? 'hidden-source-map' : 'inline-source-map',

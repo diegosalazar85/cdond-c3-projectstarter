@@ -3,8 +3,8 @@ import { Component } from 'react';
 import classNames from 'classnames';
 import ReactTable, { Column, SortingRule } from 'react-table';
 
+
 import appstyle from '../../style.local.css';
-import style from './react-table.css';
 import '../../style.local.css';
 import './react-table.css';
 
@@ -40,7 +40,7 @@ export class Table extends Component<Table.Props, Table.State> {
 
   tableClasses() {
     return classNames({
-      [style.ReactTable]: true,
+      'ReactTable': true,
       'table-large': true,
       '-highlight': true,
       '-striped': true,

@@ -1,7 +1,7 @@
+import { hot } from 'react-hot-loader/root';
 import React from 'react';
 import { Route, Switch, Redirect, RouteComponentProps } from 'react-router';
 import App from './containers/App';
-import { hot } from 'react-hot-loader';
 import './style.local.css';
 
 export interface Props {}
@@ -33,4 +33,4 @@ export class Root extends React.Component<Props, State> {
   }
 }
 
-export default hot(module)(Root);
+export default hot(Root);
