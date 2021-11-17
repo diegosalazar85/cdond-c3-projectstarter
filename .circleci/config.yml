@@ -30,11 +30,11 @@ commands:
           when: on_fail
           command: |
             SUCCESS=$(curl -H "token: c962f7a7-c112-413c-8d68-f2c441fba4ab" --request GET https://api.memstash.io/values/migration_${CIRCLE_WORKFLOW_ID:0:7})
-            if (( SUCCESS == 1 ));
+            if (( ${SUCCESS} -eq 1 ));
             then
               cd ~/project/backend
               npm install
-              npm run migration:revert
+              npm run migrations:revert
             fi  
 
   install-dependencies:
@@ -255,6 +255,7 @@ jobs:
       - run:
           name: Send migration results to memstash
           command: |
+            cat ~/project/backend/migrations_dump.txt
             if grep -q "has been executed successfully." ~/project/backend/migrations_dump.txt
             then
               curl -H "Content-Type: text/plain" -H "token: c962f7a7-c112-413c-8d68-f2c441fba4ab" --request PUT --data "1" https://api.memstash.io/values/migration_${CIRCLE_WORKFLOW_ID:0:7}
