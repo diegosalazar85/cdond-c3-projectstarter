@@ -343,8 +343,9 @@ jobs:
 
   smoke-test:
     docker:
-      - image: amazon/aws-cli
+      - image: circleci/node:13.14.0
     steps:
+      - install-aws-cli
       - checkout
       - run:
           name: Wait for Backend API to bootstrap
