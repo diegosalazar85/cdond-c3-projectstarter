@@ -332,7 +332,7 @@ jobs:
       - checkout
       - run:
           name: Wait for Backend API to bootstrap
-          command: sleep 60;
+          command: sleep 120;
       - run:
           name: Backend smoke test.
           command: |
