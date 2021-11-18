@@ -12,5 +12,7 @@
 - name: Start app
   shell: |
     npm install
+    pm2 startup
     pm2 stop default
     pm2 start npm -- start
+    pm2 save
